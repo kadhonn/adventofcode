@@ -11,7 +11,7 @@ fun main() {
             val memory = ArrayList(memoryTemplate)
             memory[1] = i
             memory[2] = j
-            runProgram(memory)
+            runProgramDay2(memory)
             if (memory[0] == 19690720) {
                 println(100 * i + j)
                 return
@@ -20,7 +20,7 @@ fun main() {
     }
 }
 
-fun runProgram(memory: MutableList<Int>) {
+fun runProgramDay2(memory: MutableList<Int>) {
     var ip = 0
     while (true) {
         when (memory[ip]) {
