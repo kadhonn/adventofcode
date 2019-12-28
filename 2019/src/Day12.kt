@@ -5,35 +5,38 @@ fun main() {
     val input = Scanner(ClassLoader.getSystemResourceAsStream("in2")!!)
     input.useDelimiter("\n")
 
-    val moons = mutableListOf<Moon>()
+    var moonsInit = mutableListOf<Moon>()
+    val pastUniverses = mutableSetOf<Universe>()
 
     while (input.hasNext()) {
         val line = input.next()
-        moons.add(parseLine(line!!))
+        moonsInit.add(parseLine(line!!))
     }
 
-    for (i in 1..1000) {
-        calcVelocity(moons)
-        applyVelocity(moons)
-    }
+    var moons = moonsInit.toList()
 
-    val sum = moons.map { it.kineticEnergie() * it.potentialEnergy() }
-        .sum()
-    println(sum)
-}
-
-fun applyVelocity(moons: MutableList<Moon>) {
-    for (moon in moons) {
-        moon.applyVelocity()
-    }
-}
-
-fun calcVelocity(moons: MutableList<Moon>) {
-    for (moon1 in moons) {
-        for (moon2 in moons.filterNot { moon -> moon === moon1 }) {
-            moon1.applyGravity(moon2)
+    var time = 0L
+    while (true) {
+        val newUniverse = Universe(moons)
+        if (pastUniverses.contains(newUniverse)) {
+            break
+        }
+        pastUniverses.add(newUniverse)
+        moons = calcVelocity(moons)
+        moons = applyVelocity(moons)
+        time++
+        if (time % 100000L == 0L) {
+            println(time)
         }
     }
+
+    println(time)
+}
+
+fun applyVelocity(moons: List<Moon>): List<Moon> = moons.map { it.applyVelocity() }
+
+fun calcVelocity(moons: List<Moon>): List<Moon> = moons.map { moon1 ->
+    moons.filterNot { it === moon1 }.fold(moon1) { a, b -> a.applyGravity(b) }
 }
 
 fun parseLine(line: String): Moon {
@@ -47,13 +50,18 @@ fun parseLine(line: String): Moon {
     )
 }
 
+data class Universe(val moons: List<Moon>)
+
 data class Moon(
-    var location: Vector,
-    var velocity: Vector = Vector(0, 0, 0)
+    val location: Vector,
+    val velocity: Vector = Vector(0, 0, 0)
 ) {
-    fun applyGravity(other: Moon) {
-        velocity = velocity.add(
-            calcGravityVector(other.location)
+    fun applyGravity(other: Moon): Moon {
+        return Moon(
+            location,
+            velocity.add(
+                calcGravityVector(other.location)
+            )
         )
     }
 
@@ -65,11 +73,11 @@ data class Moon(
         )
     }
 
-    fun applyVelocity() {
-        location = location.add(velocity)
+    fun applyVelocity(): Moon {
+        return Moon(location.add(velocity), velocity)
     }
 
-    fun kineticEnergie(): Int = velocity.absoluteSum()
+    fun kineticEnergy(): Int = velocity.absoluteSum()
 
     fun potentialEnergy(): Int = location.absoluteSum()
 
