@@ -1,4 +1,5 @@
 import java.util.*
+import kotlin.collections.HashSet
 import kotlin.math.abs
 
 fun main() {
@@ -6,7 +7,12 @@ fun main() {
     input.useDelimiter("\n")
 
     var moonsInit = mutableListOf<Moon>()
-    val pastUniverses = mutableSetOf<Universe>()
+    val pastXes = HashSet<List<Pair<Int, Int>>>()
+    val pastYes = HashSet<List<Pair<Int, Int>>>()
+    val pastZes = HashSet<List<Pair<Int, Int>>>()
+    var xesFound = false
+    var yesFound = false
+    var zesFound = false
 
     while (input.hasNext()) {
         val line = input.next()
@@ -16,21 +22,31 @@ fun main() {
     var moons = moonsInit.toList()
 
     var time = 0L
-    while (true) {
+    while (!xesFound || !yesFound || !zesFound) {
         val newUniverse = Universe(moons)
-        if (pastUniverses.contains(newUniverse)) {
-            break
+        val xes = newUniverse.extract { it.x }
+        val yes = newUniverse.extract { it.y }
+        val zes = newUniverse.extract { it.z }
+        if (!xesFound && pastXes.contains(xes)) {
+            xesFound = true
+            println("$time, ")
         }
-        pastUniverses.add(newUniverse)
+        if (!yesFound && pastYes.contains(yes)) {
+            yesFound = true
+            println("$time, ")
+        }
+        if (!zesFound && pastZes.contains(zes)) {
+            zesFound = true
+            println("$time, ")
+        }
+        pastXes.add(xes)
+        pastYes.add(yes)
+        pastZes.add(zes)
         moons = calcVelocity(moons)
         moons = applyVelocity(moons)
         time++
-        if (time % 100000L == 0L) {
-            println(time)
-        }
     }
 
-    println(time)
 }
 
 fun applyVelocity(moons: List<Moon>): List<Moon> = moons.map { it.applyVelocity() }
@@ -50,7 +66,13 @@ fun parseLine(line: String): Moon {
     )
 }
 
-data class Universe(val moons: List<Moon>)
+data class Universe(val moons: List<Moon>) {
+    fun extract(extractor: (Vector) -> Int): List<Pair<Int, Int>> {
+        return moons.map {
+            Pair(extractor(it.location), extractor(it.velocity))
+        }
+    }
+}
 
 data class Moon(
     val location: Vector,
