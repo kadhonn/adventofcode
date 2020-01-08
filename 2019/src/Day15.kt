@@ -70,24 +70,26 @@ fun main() {
 }
 
 fun flood(map: MutableMap<Point, Cell>): Int {
-    val alreadyVisitedPoints = mutableSetOf(Point(0, 0))
+    var beginPoint = map.entries.filter { it.value.state == CellState.OXYGENSYSTEM }.first().key
+
+    val alreadyVisitedPoints = mutableSetOf(beginPoint)
     var count = 0
-    var currentPoints = mutableSetOf(Point(0, 0))
+    var currentPoints = mutableSetOf(beginPoint)
 
     while (true) {
+        if (currentPoints.isEmpty()) {
+            return count
+        }
         count++
         val nextPoints = mutableSetOf<Point>()
 
         for (point in currentPoints) {
             for (direction in allDirectionsSet()) {
                 val newPoint = newLocation(point, direction)
-                if (map[newPoint]!!.state == CellState.OXYGENSYSTEM) {
-                    return count
-                }
                 if (alreadyVisitedPoints.contains(newPoint)) {
                     continue
                 }
-                if(map[newPoint]!!.state==CellState.AIR){
+                if (map[newPoint]!!.state == CellState.AIR) {
                     nextPoints.add(newPoint)
                 }
             }
