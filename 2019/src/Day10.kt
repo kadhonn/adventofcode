@@ -1,4 +1,5 @@
 import kotlin.math.abs
+import kotlin.math.atan2
 
 fun main() {
     Day10.run()
@@ -14,19 +15,12 @@ object Day10 {
             .map { it.toList() }
             .toList()
 
-        var max = 0
-        for (i in field.indices) {
-            for (j in field[i].indices) {
-                if (field[i][j]) {
-                    max = Math.max(max, calc(field, i, j))
-                }
-            }
-        }
+        val coords = calc(field, 11, 11)
 
-        println(max)
+        println(coords)
     }
 
-    private fun calc(field: List<List<Boolean>>, x: Int, y: Int): Int {
+    private fun calc(field: List<List<Boolean>>, x: Int, y: Int): Pair<Int, Int> {
         val excluded = field.indices.flatMap { i -> field[i].indices.map { j -> Pair(i, j) } }
             .filter { field[it.first][it.second] }
             .filter { it.first != x || it.second != y }
@@ -47,8 +41,17 @@ object Day10 {
                 excluded
             })
 
-        val totalAsteroids = field.flatMap { it }.filter { it }.count()
-        return totalAsteroids - excluded.size - 1
+        return field.indices.flatMap { i -> field[i].indices.map { j -> Pair(i, j) } }
+            .filter { field[it.first][it.second] }
+            .filter { it.first != x || it.second != y }
+            .filter { !excluded.contains(it) }
+            .sortedBy { angle(Pair(x, y), it) }
+            .reversed()
+            .map { println(it);it }[199]
+    }
+
+    private fun angle(us: Pair<Int, Int>, asteroid: Pair<Int, Int>): Double {
+        return atan2(asteroid.second.toDouble() - us.second, asteroid.first.toDouble() - us.first)
     }
 
     private val primes = listOf(2, 3, 5, 7, 11, 13, 17, 19, 21)
