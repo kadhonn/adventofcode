@@ -1,3 +1,4 @@
-/.idea/
-/2019/lib/
-/lib/
+.idea
+out/
+*.iml
+lib/
