@@ -200,7 +200,7 @@ class Day18 {
     }
 
     private fun parseField(): List<List<Char>> {
-        val input = String(ClassLoader.getSystemResourceAsStream("in")!!.readAllBytes())
+        val input = String(ClassLoader.getSystemResourceAsStream("in.txt")!!.readAllBytes())
 
         return input.split("\n").map {
             it.toCharArray().toList()
