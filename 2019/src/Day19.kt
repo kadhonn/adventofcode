@@ -10,29 +10,28 @@ class Day19 {
 
     private val input = String(ClassLoader.getSystemResourceAsStream("in.txt")!!.readAllBytes()).split(",").map { it.toLong() }
     fun run() {
-
-        var x = 0L
+        var x = 50L
         var y = 0L
-        var count = 0
 
-        while (y < 50) {
-            val result = eval(x, y)
-
-            if (result == 1L) {
-                count++
-                print('#')
+        while (true) {
+            if (eval(x + 1, y) == 1L) {
+                x++
             } else {
-                print('.')
-            }
-            x++
-            if (x == 50L) {
-                println()
                 y++
-                x = 0
+            }
+            var success = true
+            for (i in 0..99) {
+                if (eval(x - i, y + i) == 0L) {
+                    success = false
+                    println("i: $i, x: $x, y: $y")
+                    break
+                }
+            }
+            if (success) {
+                println((x - 99) * 10000 + y)
+                break
             }
         }
-
-        println(count)
     }
 
     private fun eval(x: Long, y: Long): Long {
