@@ -1,21 +1,28 @@
 fun main() {
     Day1.doRun(ClassLoader.getSystemResourceAsStream("day1_full.in").readAllBytes().decodeToString())
+//    Day1.doRun(ClassLoader.getSystemResourceAsStream("day1_example.in").readAllBytes().decodeToString())
 }
 
 object Day1 {
     fun doRun(input: String) {
         val lines = input.trim().split("\r\n").filter { !it.isNullOrEmpty() }.map { it.toInt() }
 
-        var count = 0
-        var last = lines[0]
 
-        for (line in lines.drop(1)) {
-            if (line > last) {
+        var count = 0
+        var last = sum(lines, 0)
+
+        for (i in 1..lines.size - 3) {
+            val sum = sum(lines, i)
+            if (sum > last) {
                 count++
             }
-            last = line
+            last = sum
         }
 
         println(count)
+    }
+
+    private fun sum(lines: List<Int>, i: Int): Int {
+        return lines.subList(i, i + 3).sum()
     }
 }
