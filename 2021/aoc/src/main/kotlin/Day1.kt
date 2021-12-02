@@ -1,6 +1,6 @@
 fun main() {
-    Day1.doRun(ClassLoader.getSystemResourceAsStream("day1_full.in").readAllBytes().decodeToString())
-//    Day1.doRun(ClassLoader.getSystemResourceAsStream("day1_example.in").readAllBytes().decodeToString())
+    Day1.doRun(ClassLoader.getSystemResource("day1_full.in").readText())
+//    Day1.doRun(ClassLoader.getSystemResourceAsStream("day1_example.in").readText())
 }
 
 object Day1 {
