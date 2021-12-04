@@ -21,16 +21,21 @@ object Day4 {
         }
 
         for (number in numbers) {
+            val doneFields = mutableListOf<Pair<MutableSet<Int>, MutableList<MutableSet<Int>>>>()
             for (field in fields) {
                 field.first.remove(number)
                 for (set in field.second) {
                     set.remove(number)
                     if (set.isEmpty()) {
-                        println(field.first.sum() * number)
-                        return
+                        if (fields.size == 1) {
+                            println(fields[0].first.sum() * number)
+                            return
+                        }
+                        doneFields.add(field)
                     }
                 }
             }
+            fields.removeAll(doneFields)
         }
     }
 
