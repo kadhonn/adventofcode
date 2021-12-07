@@ -18,7 +18,10 @@ object Day7 {
     }
 
     private fun cost(crabs: List<Int>, middle: Int): Int {
-        return crabs.map { ((it - middle).absoluteValue downTo 1).sum()  }.sum()
+        return crabs.map {
+            val absoluteValue = (it - middle).absoluteValue
+            absoluteValue * (absoluteValue + 1) / 2
+        }.sum()
     }
 
 }
