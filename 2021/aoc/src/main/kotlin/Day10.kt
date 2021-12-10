@@ -8,10 +8,10 @@ fun main() {
 object Day10 {
 
     val scores = mutableMapOf(
-        Pair(')', 3),
-        Pair(']', 57),
-        Pair('}', 1197),
-        Pair('>', 25137)
+        Pair(')', 1),
+        Pair(']', 2),
+        Pair('}', 3),
+        Pair('>', 4)
     )
     val chunkPairs = mutableMapOf(
         Pair('(', ')'),
@@ -23,17 +23,17 @@ object Day10 {
     fun part1(input: String) {
         val lines = input.split("\r\n")
 
-        var sum = 0
+        val results = mutableListOf<Long>()
         for (line in lines) {
             val ret = checkLine(line)
             if (ret != null) {
-                sum += scores[ret]!!
+                results.add(ret)
             }
         }
-        println(sum)
+        println(results.sorted()[results.size / 2])
     }
 
-    private fun checkLine(line: String): Char? {
+    private fun checkLine(line: String): Long? {
         val stack: Deque<Char> = LinkedList()
 
         for (i in line.chars()) {
@@ -43,11 +43,16 @@ object Day10 {
             } else {
                 val openingChar = stack.pop()
                 if (c != chunkPairs[openingChar]!!) {
-                    return c
+                    return null
                 }
             }
         }
-        return null
+        var sum = 0L
+        while (stack.isNotEmpty()) {
+            sum *= 5
+            sum += scores[chunkPairs[stack.pop()]!!]!!
+        }
+        return sum
     }
 
 
