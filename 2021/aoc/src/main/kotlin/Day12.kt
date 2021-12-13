@@ -24,7 +24,11 @@ object Day12 {
         currentNode: String
     ) {
         for (node in network[currentNode]!!) {
-            if (node[0].isUpperCase() || !currentPath.contains(node)) {
+            if (node != "start" &&
+                (node[0].isUpperCase() || currentPath.groupBy { it }
+                    .filter { it.key[0].isLowerCase() && it.value.size == 2 }
+                    .count() == 0 || !currentPath.contains(node))
+            ) {
                 currentPath.add(node)
                 if (node == "end") {
                     paths.add(currentPath.toList())
