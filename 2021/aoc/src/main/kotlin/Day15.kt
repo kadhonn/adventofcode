@@ -1,5 +1,10 @@
+import java.util.*
+import kotlin.system.measureTimeMillis
+
 fun main() {
-    Day15.part1(ClassLoader.getSystemResource("day15_full.in").readText().trim())
+    println(measureTimeMillis {
+        Day15.part1(ClassLoader.getSystemResource("day15_full.in").readText().trim())
+    })
 //    Day15.part1(ClassLoader.getSystemResource("day15_example.in").readText().trim())
 }
 
@@ -17,13 +22,12 @@ object Day15 {
         val end = Pair(field.size * 5 - 1, field[0].size * 5 - 1)
 
         val reachedPoints = mutableSetOf<Pair<Int, Int>>()
-        val reachablePoints = mutableListOf<Triple<Int, Int, Int>>()
+        val reachablePoints = PriorityQueue<Triple<Int, Int, Int>>(Comparator.comparing { it.third })
 
         reachablePoints.add(Triple(0, 0, 0))
 
         while (reachablePoints.isNotEmpty()) {
-            val min = reachablePoints.minByOrNull { it.third }!!
-            reachablePoints.remove(min)
+            val min = reachablePoints.poll()
             val coords = Pair(min.first, min.second)
             if (reachedPoints.contains(coords)) {
                 continue
@@ -31,7 +35,7 @@ object Day15 {
             reachedPoints.add(coords)
 
             if (coords == end) {
-                println(min.third)
+                println(min.third - (end.first - min.first) - (end.second - min.second))
                 return
             }
 
@@ -45,7 +49,19 @@ object Day15 {
             nextPossiblePoints.filter {
                 it.first >= 0 && it.first < field.size * 5 && it.second >= 0 && it.second < field[0].size * 5
             }.forEach {
-                reachablePoints.add(Triple(it.first, it.second, min.third + getCost(field, it.first, it.second)))
+                if (!reachedPoints.contains(Pair(it.first, it.second))) {
+                    reachablePoints.add(
+                        Triple(
+                            it.first,
+                            it.second,
+                            min.third + getCost(
+                                field,
+                                it.first,
+                                it.second
+                            )
+                        )
+                    )
+                }
             }
         }
 
