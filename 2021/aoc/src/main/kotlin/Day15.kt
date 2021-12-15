@@ -14,7 +14,7 @@ object Day15 {
                 .toTypedArray()
         }.toTypedArray()
 
-        val end = Pair(field.size - 1, field[0].size - 1)
+        val end = Pair(field.size * 5 - 1, field[0].size * 5 - 1)
 
         val reachedPoints = mutableSetOf<Pair<Int, Int>>()
         val reachablePoints = mutableListOf<Triple<Int, Int, Int>>()
@@ -43,13 +43,19 @@ object Day15 {
             )
 
             nextPossiblePoints.filter {
-                it.first >= 0 && it.first < field.size && it.second >= 0 && it.second < field[0].size
+                it.first >= 0 && it.first < field.size * 5 && it.second >= 0 && it.second < field[0].size * 5
             }.forEach {
-                reachablePoints.add(Triple(it.first, it.second, min.third + field[it.first][it.second]))
+                reachablePoints.add(Triple(it.first, it.second, min.third + getCost(field, it.first, it.second)))
             }
         }
 
         println("oh no")
+    }
+
+    private fun getCost(field: Array<Array<Int>>, row: Int, col: Int): Int {
+        val origCost = field[row % field.size][col % field[0].size]
+
+        return ((origCost + (row / field.size) + (col / field[0].size)) - 1) % 9 + 1
     }
 
 }
