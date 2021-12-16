@@ -11,42 +11,92 @@ object Day16 {
 
     var bitPos = 0
     var messageBytes = ByteArray(0)
-    var versionSum = 0
     fun part1(input: String) {
         messageBytes = input.decodeHex()
 
-        while (true) {
-            if (bitPos + 8 >= messageBytes.size * 8) {
-                break
-            }
-            val version = readVersion()
-            versionSum += version
-            val type = readType()
-            print("new packet with version $version and type $type: ")
-            when (type) {
-                4 -> {
-                    // literal
-                    var lastPacket = false
-                    var value = 0L
-                    while (!lastPacket) {
-                        lastPacket = readBits(1) == 0
-                        value = value.shl(4).or(readBits(4).toLong())
-                    }
-                    println("literal: $value")
+        val result = readPacket()
+
+        println(result)
+    }
+
+    private fun readPacket(): Long {
+        val version = readVersion()
+        val type = readType()
+//            print("new packet with version $version and type $type: ")
+        when (type) {
+            4 -> {
+                // literal
+                var lastPacket = false
+                var value = 0L
+                while (!lastPacket) {
+                    lastPacket = readBits(1) == 0
+                    value = value.shl(4).or(readBits(4).toLong())
                 }
-                else -> {
-                    //operator
-                    val lengthType = readBits(1)
-                    if (lengthType == 0) {
-                        val subpacketsLength = readBits(15)
-                    } else {
-                        val subpacketsCount = readBits(11)
+                return value
+//                    println("literal: $value")
+            }
+            else -> {
+                //operator
+                val subPackets = readSubpackets()
+
+                when (type) {
+                    0 -> {
+                        return subPackets.sum()
+                    }
+                    1 -> {
+                        return subPackets.fold(1, Long::times)
+                    }
+                    2 -> {
+                        return subPackets.minOrNull()!!
+                    }
+                    3 -> {
+                        return subPackets.maxOrNull()!!
+                    }
+                    5 -> {
+                        return if (subPackets[0] > subPackets[1]) {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    6 -> {
+                        return if (subPackets[0] < subPackets[1]) {
+                            1
+                        } else {
+                            0
+                        }
+                    }
+                    7 -> {
+                        return if (subPackets[0] == subPackets[1]) {
+                            1
+                        } else {
+                            0
+                        }
                     }
                 }
             }
         }
+        throw RuntimeException("invalid type: $type")
+    }
 
-        println("versionSum: $versionSum")
+    private fun readSubpackets(): List<Long> {
+        val lengthType = readBits(1)
+        val subpackets = mutableListOf<Long>()
+
+        if (lengthType == 0) {
+            val subpacketsLength = readBits(15)
+            val stopBitPos = bitPos + subpacketsLength
+            while (bitPos < stopBitPos) {
+                subpackets.add(readPacket())
+            }
+        } else {
+            val subpacketsCount = readBits(11)
+            for (i in 1..subpacketsCount) {
+                subpackets.add(readPacket())
+            }
+        }
+
+        return subpackets
     }
 
     private fun readVersion(): Int {
