@@ -1,5 +1,6 @@
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
 fun main() {
@@ -44,17 +45,16 @@ object Day18 {
     fun part1(input: String) {
         val lines = input.split("\r\n")
 
-        var number = parseNumber(lines[0])
-
-        for (i in 1 until lines.size) {
-            val newNumber = parseNumber(lines[i])
-            println("  " + number)
-            println("+ " + newNumber)
-            number = add(number, newNumber)
-            println("= " + number)
-            println()
+        var max = -1
+        for (i in 0 until lines.size) {
+            for (j in 0 until lines.size) {
+                if (i == j) {
+                    continue
+                }
+                max = max(max, add(parseNumber(lines[i]), parseNumber(lines[j])).sum())
+            }
         }
-        println(number.sum())
+        println(max)
     }
 
     private fun add(n1: Number, n2: Number): Number {
