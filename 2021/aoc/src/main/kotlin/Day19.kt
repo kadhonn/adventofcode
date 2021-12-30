@@ -1,3 +1,5 @@
+import java.lang.Math.max
+import kotlin.math.abs
 import kotlin.system.measureTimeMillis
 
 fun main() {
@@ -41,6 +43,10 @@ object Day19 {
 
         override fun compareTo(other: Vector): Int {
             return COMPARATOR.compare(this, other)
+        }
+
+        fun manhattan(other: Vector): Int {
+            return abs(other.x - x) + abs(other.y - y) + abs(other.z - z)
         }
     }
 
@@ -122,7 +128,7 @@ object Day19 {
         }
 
         fun matched() {
-            for(beacon in beacons){
+            for (beacon in beacons) {
                 beacon.getAbsolutePosition()
             }
             distances = calcDistances()
@@ -158,9 +164,17 @@ object Day19 {
         val scanners = parseScanners(lines)
         matchScanners(scanners)
         countBeacons(scanners)
-        for (scanner in scanners) {
-            println("${scanner.key}: ${scanner.value.offset}")
+        printMaxDistance(scanners)
+    }
+
+    private fun printMaxDistance(scanners: Map<Int, Scanner>) {
+        var max = 0
+        for (s1 in scanners.values) {
+            for (s2 in scanners.values) {
+                max = max(max, s1.offset!!.manhattan(s2.offset!!))
+            }
         }
+        println(max)
     }
 
     private fun countBeacons(scanners: Map<Int, Scanner>) {
@@ -171,7 +185,6 @@ object Day19 {
             }
         }
         println(positions.size)
-//        positions.sorted().forEach { println(it) }
     }
 
     private fun matchScanners(scanners: Map<Int, Scanner>) {
@@ -196,7 +209,7 @@ object Day19 {
                     }
 //                    println("trying to match scanners $nextScannerNumber and $scannerNumber")
                     if (tryMatch(nextScanner, scanner)) {
-                        println("matched scanners $nextScannerNumber and $scannerNumber")
+//                        println("matched scanners $nextScannerNumber and $scannerNumber")
                         readyScanners.add(scannerNumber)
                         doneScanners.add(scannerNumber)
                     }
