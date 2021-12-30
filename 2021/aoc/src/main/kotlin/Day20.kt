@@ -33,7 +33,7 @@ object Day20 {
 
 
         var unknown = '.'
-        for (i in 1..2) {
+        for (i in 1..50) {
             val newMap = mutableMapOf<Pair<Int, Int>, Char>()
             min--
             max++
