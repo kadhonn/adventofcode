@@ -9,48 +9,62 @@ fun main() {
 
 object Day21 {
 
+    data class Game(
+        val pos1: Int,
+        val pos2: Int,
+        val curPlayerIsFirst: Boolean = true,
+        val score1: Int = 0,
+        val score2: Int = 0
+    )
+
+    val cache = mutableMapOf<Game, Pair<Long, Long>>()
     fun part1(input: String) {
         val lines = input.split("\r\n").map { it.trim() }
-        var pos1 = lines[0].substring(28).toInt()
-        var pos2 = lines[1].substring(28).toInt()
-        var score1 = 0
-        var score2 = 0
-        var dice = 1
-        var diceCount = 0
+        val pos1 = lines[0].substring(28).toInt()
+        val pos2 = lines[1].substring(28).toInt()
 
-        while (score1 < 1000 && score2 < 1000) {
-            var threeDice = 0
-            for (i in 1..3) {
-                diceCount++
-                threeDice += dice++
-                if (dice == 101) {
-                    dice = 1
-                }
-            }
-            pos1 += threeDice
-            while (pos1 > 10) {
-                pos1 -= 10
-            }
-            score1 += pos1
-            if (score1 >= 1000) {
-                break
-            }
-
-            threeDice = 0
-            for (i in 1..3) {
-                diceCount++
-                threeDice += dice++
-                if (dice == 101) {
-                    dice = 1
-                }
-            }
-            pos2 += threeDice
-            while (pos2 > 10) {
-                pos2 -= 10
-            }
-            score2 += pos2
+        val game = Game(pos1, pos2)
+        val wins = findWins(game)
+        println(wins)
+        if (wins.first > wins.second) {
+            println(wins.first)
+        } else {
+            println(wins.second)
         }
-        println(diceCount * if (score2 >= 1000) score1 else score2)
+    }
+
+    private val scoreNeeded = 21
+    private fun findWins(game: Game): Pair<Long, Long> {
+        if (cache.containsKey(game)) {
+            return cache.get(game)!!
+        }
+        if (game.score1 >= scoreNeeded) {
+            return Pair(1, 0)
+        } else if (game.score2 >= scoreNeeded) {
+            return Pair(0, 1)
+        }
+        var wins = Pair(0L, 0L)
+        for (i in 1..3) {
+            for (j in 1..3) {
+                for (k in 1..3) {
+                    val afterMoveGame = move(game, i + j + k)
+                    val afterMoveWins = findWins(afterMoveGame)
+                    wins = Pair(wins.first + afterMoveWins.first, wins.second + afterMoveWins.second)
+                }
+            }
+        }
+        cache.put(game, wins)
+        return wins
+    }
+
+    private fun move(game: Game, i: Int): Game {
+        val pos1 = if (!game.curPlayerIsFirst) game.pos1 else (game.pos1 - 1 + i) % 10 + 1
+        val score1 = if (!game.curPlayerIsFirst) game.score1 else game.score1 + pos1
+        val pos2 = if (game.curPlayerIsFirst) game.pos2 else (game.pos2 - 1 + i) % 10 + 1
+        val score2 = if (game.curPlayerIsFirst) game.score2 else game.score2 + pos2
+        return Game(
+            pos1, pos2, !game.curPlayerIsFirst, score1, score2
+        )
     }
 
 }
