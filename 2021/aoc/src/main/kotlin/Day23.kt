@@ -15,44 +15,78 @@ object Day23 {
         Pair(1, listOf(0, 2)),
         Pair(2, listOf(1, 3, 11)),
         Pair(3, listOf(2, 4)),
-        Pair(4, listOf(3, 5, 13)),
+        Pair(4, listOf(3, 5, 15)),
         Pair(5, listOf(4, 6)),
-        Pair(6, listOf(5, 7, 15)),
+        Pair(6, listOf(5, 7, 19)),
         Pair(7, listOf(6, 8)),
-        Pair(8, listOf(7, 9, 17)),
+        Pair(8, listOf(7, 9, 23)),
         Pair(9, listOf(8, 10)),
         Pair(10, listOf(9)),
+
         Pair(11, listOf(2, 12)),
-        Pair(12, listOf(11)),
-        Pair(13, listOf(4, 14)),
+        Pair(12, listOf(11, 13)),
+        Pair(13, listOf(12, 14)),
         Pair(14, listOf(13)),
-        Pair(15, listOf(6, 16)),
-        Pair(16, listOf(15)),
-        Pair(17, listOf(8, 18)),
+
+        Pair(15, listOf(4, 16)),
+        Pair(16, listOf(15, 17)),
+        Pair(17, listOf(16, 18)),
         Pair(18, listOf(17)),
+
+        Pair(19, listOf(6, 20)),
+        Pair(20, listOf(19, 21)),
+        Pair(21, listOf(20, 22)),
+        Pair(22, listOf(21)),
+
+        Pair(23, listOf(8, 24)),
+        Pair(24, listOf(23, 25)),
+        Pair(25, listOf(24, 26)),
+        Pair(26, listOf(25)),
     )
 
     fun part1(input: String) {
-        val field = MutableList<Char?>(19) { null }
+        val field = MutableList<Char?>(27) { null }
         //example
 //        field[11] = 'B'
-//        field[12] = 'A'
-//        field[13] = 'C'
-//        field[14] = 'D'
-//        field[15] = 'B'
+//        field[12] = 'D'
+//        field[13] = 'D'
+//        field[14] = 'A'
+//
+//        field[15] = 'C'
 //        field[16] = 'C'
-//        field[17] = 'D'
-//        field[18] = 'A'
+//        field[17] = 'B'
+//        field[18] = 'D'
+//
+//        field[19] = 'B'
+//        field[20] = 'B'
+//        field[21] = 'A'
+//        field[22] = 'C'
+//
+//        field[23] = 'D'
+//        field[24] = 'A'
+//        field[25] = 'C'
+//        field[26] = 'A'
 
         //my
-        field[11]='B'
-        field[12]='C'
-        field[13]='D'
-        field[14]='D'
-        field[15]='C'
-        field[16]='B'
-        field[17]='A'
-        field[18]='A'
+        field[11] = 'B'
+        field[12] = 'D'
+        field[13] = 'D'
+        field[14] = 'C'
+
+        field[15] = 'D'
+        field[16] = 'C'
+        field[17] = 'B'
+        field[18] = 'D'
+
+        field[19] = 'C'
+        field[20] = 'B'
+        field[21] = 'A'
+        field[22] = 'B'
+
+        field[23] = 'A'
+        field[24] = 'A'
+        field[25] = 'C'
+        field[26] = 'A'
 
         val alreadySeenPositions = mutableSetOf<List<Char?>>()
         val toHandlePositions =
@@ -66,6 +100,7 @@ object Day23 {
             }
             alreadySeenPositions.add(position.second)
             if (isWinning(position.second)) {
+                printHierarchy(position)
                 println("found winning position in: " + position.first)
                 return
             }
@@ -81,21 +116,59 @@ object Day23 {
         println("uh oh")
     }
 
+    private fun printHierarchy(position: Triple<Int, List<Char?>, Triple<Any, Any, Any>?>) {
+        if (position.third != null) {
+            printHierarchy(position.third as Triple<Int, List<Char?>, Triple<Any, Any, Any>?>)
+        }
+        printField(position)
+    }
+
+    private fun printField(position: Triple<Int, List<Char?>, Triple<Any, Any, Any>?>) {
+        println("cost: ${position.first}")
+        val field = position.second
+        for (i in 0..10) {
+            print(field[i] ?: '.')
+        }
+        println()
+        for (i in 0..3) {
+            print(" ")
+            for (j in 0..3) {
+                print(" ")
+                print(field[11 + i + 4 * j] ?: '.')
+            }
+            println()
+        }
+    }
+
     private fun getTestPosition(): List<Char?> {
-        val field = MutableList<Char?>(19) { null }
-        field[12] = 'A'
-        field[9] = 'A'
-        field[13] = 'B'
-        field[14] = 'B'
+        val field = MutableList<Char?>(27) { null }
+        field[0] = 'A'
+        field[14] = 'A'
+        field[21] = 'A'
+        field[26] = 'A'
+
+        field[11] = 'B'
+        field[17] = 'B'
+        field[19] = 'B'
+        field[20] = 'B'
+
         field[15] = 'C'
         field[16] = 'C'
-        field[17] = 'D'
+        field[22] = 'C'
+        field[25] = 'C'
+
+        field[10] = 'D'
+        field[12] = 'D'
+        field[13] = 'D'
         field[18] = 'D'
         return field
     }
 
     private fun isWinning(field: List<Char?>): Boolean {
-        return field[11] == 'A' && field[12] == 'A' && field[13] == 'B' && field[14] == 'B' && field[15] == 'C' && field[16] == 'C' && field[17] == 'D' && field[18] == 'D'
+        return field[11] == 'A' && field[12] == 'A' && field[13] == 'A' && field[14] == 'A' &&
+                field[15] == 'B' && field[16] == 'B' && field[17] == 'B' && field[18] == 'B' &&
+                field[19] == 'C' && field[20] == 'C' && field[21] == 'C' && field[22] == 'C' &&
+                field[23] == 'D' && field[24] == 'D' && field[25] == 'D' && field[26] == 'D'
     }
 
     private fun getNextPositions(position: Triple<Int, List<Char?>, Triple<Any, Any, Any>?>): Collection<Triple<Int, List<Char?>, Triple<Any, Any, Any>?>> {
@@ -142,6 +215,7 @@ object Day23 {
                             Triple(
                                 position.first + steps * cost,
                                 newField,
+//                                null
                                 position as Triple<Any, Any, Any>
                             )
                         )
@@ -162,16 +236,16 @@ object Day23 {
         if (nextMove > 10) {
             val correct = when (field[i]) {
                 'A' -> {
-                    nextMove == 12 || (nextMove == 11 && field[12] == 'A')
+                    nextMove in 11..14 && (11..14).filter { field[it] != 'A' && field[it] != null }.isEmpty()
                 }
                 'B' -> {
-                    nextMove == 14 || (nextMove == 13 && field[14] == 'B')
+                    nextMove in 15..18 && (15..18).filter { field[it] != 'B' && field[it] != null }.isEmpty()
                 }
                 'C' -> {
-                    nextMove == 16 || (nextMove == 15 && field[16] == 'C')
+                    nextMove in 19..22 && (19..22).filter { field[it] != 'C' && field[it] != null }.isEmpty()
                 }
                 'D' -> {
-                    nextMove == 18 || (nextMove == 17 && field[18] == 'D')
+                    nextMove in 23..26 && (23..26).filter { field[it] != 'D' && field[it] != null }.isEmpty()
                 }
                 else -> {
                     throw RuntimeException("invalid char ${field[i]}")
@@ -189,16 +263,16 @@ object Day23 {
         if (i > 10) {
             val incorrect = when (field[i]) {
                 'A' -> {
-                    i == 12 || (i == 11 && field[12] == 'A')
+                    i in 11..14 && (11..14).filter { field[it] != 'A' && field[it] != null }.isEmpty()
                 }
                 'B' -> {
-                    i == 14 || (i == 13 && field[14] == 'B')
+                    i in 15..18 && (15..18).filter { field[it] != 'B' && field[it] != null }.isEmpty()
                 }
                 'C' -> {
-                    i == 16 || (i == 15 && field[16] == 'C')
+                    i in 19..22 && (19..22).filter { field[it] != 'C' && field[it] != null }.isEmpty()
                 }
                 'D' -> {
-                    i == 18 || (i == 17 && field[18] == 'D')
+                    i in 23..26 && (23..26).filter { field[it] != 'D' && field[it] != null }.isEmpty()
                 }
                 else -> {
                     throw RuntimeException("invalid char ${field[i]}")
@@ -206,6 +280,32 @@ object Day23 {
             }
             if (incorrect) {
                 return false
+            }
+        }
+        //extra 2
+        if (nextMove > 10) {
+            val c = field[i]
+            val start = when (c) {
+                'A' -> {
+                    14
+                }
+                'B' -> {
+                    18
+                }
+                'C' -> {
+                    22
+                }
+                'D' -> {
+                    26
+                }
+                else -> {
+                    throw RuntimeException("invalid char $c")
+                }
+            }
+            for (end in start downTo nextMove + 1) {
+                if (field[end] != c) {
+                    return false
+                }
             }
         }
         return true
