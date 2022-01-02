@@ -9,6 +9,37 @@ fun main() {
 
 object Day24 {
 
+    /*
+    inp w
+mul x 0		x = 0
+add x z		x = z
+mod x 26	x = z % 26
+div z 1		z = z
+add x 14	x = x + 14
+eql x w
+eql x 0		x = 1 if x != w
+mul y 0		y = 0
+add y 25	y = 25
+mul y x		y = y * 0/1
+add y 1		y = y + 1
+mul z y		z = z * 1/26
+mul y 0		y = 0
+add y w		y = w
+add y 8		y = w + 8
+mul y x		y = y * 0/1
+add z y		z = z + y
+
+
+
+x = z % 26 + ?
+
+z = z / 26 || z
+if x == w nothing changes
+else z = z * 26 + w + ?
+
+
+
+     */
     fun part1(input: String) {
         var startingPositions = mutableMapOf(Pair(0L, 0L))
         val lines = input.split("\r\n").map { it.trim() }
