@@ -15,7 +15,7 @@ object Day24 {
         for (nr in 0..13) {
             val newStartingPositions = mutableMapOf<Long, Long>()
             for (startingPosition in startingPositions) {
-                for (input in 1..9) {
+                for (input in 9 downTo 1) {
                     val registers = mutableListOf(0L, 0L, 0L, startingPosition.key)
                     for (line in lines.subList(nr * 18, (nr + 1) * 18)) {
                         val s = line.split(" ")
@@ -46,7 +46,7 @@ object Day24 {
                     newStartingPositions.put(registers[3], startingPosition.value * 10 + input)
                 }
             }
-            val wantedKeys = newStartingPositions.keys.sorted().take(10000).toSet()
+            val wantedKeys = newStartingPositions.keys.sorted().take(20000).toSet()
             startingPositions = newStartingPositions.filter { wantedKeys.contains(it.key) }.toMutableMap()
         }
         println(startingPositions[0])
