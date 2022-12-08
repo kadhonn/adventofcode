@@ -4,3 +4,4 @@ out/
 lib/
 .gradle/
 build/
+/2022/target/
