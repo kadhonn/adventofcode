@@ -2,10 +2,10 @@
 
 use std::fs;
 
-mod day6;
+mod day7;
 
 fn main() {
-    // let str = fs::read_to_string("in/in6_ex.txt").unwrap();
-    let str = fs::read_to_string("in/in6.txt").unwrap();
-    day6::day6_1(&str.trim());
+    // let str = fs::read_to_string("in/in7_ex.txt").unwrap();
+    let str = fs::read_to_string("in/in7.txt").unwrap();
+    day7::day7_2(&str.trim());
 }
