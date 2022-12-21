@@ -5,8 +5,6 @@ use regex::Regex;
 pub fn day16_1(str: &str) {
     let valves = parse_input(str);
 
-    let mut visited_states: HashMap<StateHash, i32> = HashMap::new();
-
     let mut current_states = vec![State {
         current_position: "AA",
         current_release: 0,
@@ -15,35 +13,20 @@ pub fn day16_1(str: &str) {
     }];
 
     for _ in 0..30 {
-        println!("{} {}", current_states.len(), visited_states.len());
+        println!("{}", current_states.len());
         let mut next_states = vec![];
         // println!();
         // println!("current:");
         // for state in &current_states {
         //     println!("{:?}", state);
         // }
-        // println!("visited:");
-        // for state in &visited_states {
-        //     println!("{:?}", state);
-        // }
         for state in &current_states {
-            // let (hash, total_release) = state.to_hashable();
-            // if has_better(&visited_states, &hash, total_release) {
-            //     println!("had better: {:?}", state);
-            // continue;
-            // }
-            // visited_states.insert(hash, total_release);
-
             for next_state in get_next_states(&valves, state) {
-                let (hash, total_release) = next_state.to_hashable();
-                if !has_better(&visited_states, &hash, total_release) {
-                    next_states.push(next_state);
-                    visited_states.insert(hash, total_release);
-                }
+                next_states.push(next_state);
             }
         }
 
-        current_states = next_states;
+        current_states = prune(next_states);
     }
 
     // println!("fu");
@@ -57,6 +40,32 @@ pub fn day16_1(str: &str) {
     }
 
     println!("{max}");
+}
+
+fn prune(states: Vec<State>) -> Vec<State> {
+    let mut best_states = HashMap::new();
+
+    'outer: for state in states {
+        if !best_states.contains_key(state.current_position) {
+            best_states.insert(state.current_position, vec![state]);
+        } else {
+            let best_states = best_states.get_mut(state.current_position).unwrap();
+            for best_state in best_states.iter() {
+                if state.total_release <= best_state.total_release && state.current_release <= best_state.current_release {
+                    continue 'outer;
+                }
+            }
+            best_states.push(state);
+        }
+    }
+
+    let mut result = vec![];
+    for (_pos, states) in best_states {
+        for state in states {
+            result.push(state);
+        }
+    }
+    result
 }
 
 fn get_next_states<'a>(valves: &'a HashMap<String, Valve>, state: &State<'a>) -> Vec<State<'a>> {
@@ -82,14 +91,15 @@ fn get_next_states<'a>(valves: &'a HashMap<String, Valve>, state: &State<'a>) ->
                 opened_valves: state.opened_valves.clone(),
             });
         }
+    } else {
+        next_states.push(State {
+            current_position: state.current_position,
+            current_release: state.current_release,
+            total_release: next_total_release,
+            opened_valves: state.opened_valves.clone(),
+        });
     }
 
-    next_states.push(State {
-        current_position: state.current_position,
-        current_release: state.current_release,
-        total_release: next_total_release,
-        opened_valves: state.opened_valves.clone(),
-    });
 
     next_states
 }
