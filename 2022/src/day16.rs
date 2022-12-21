@@ -2,17 +2,18 @@ use std::collections::{HashMap, HashSet};
 use std::hash::{Hash};
 use regex::Regex;
 
-pub fn day16_1(str: &str) {
+pub fn day16_2(str: &str) {
     let valves = parse_input(str);
 
     let mut current_states = vec![State {
-        current_position: "AA",
+        current_position_me: "AA",
+        current_position_el: "AA",
         current_release: 0,
         total_release: 0,
         opened_valves: HashSet::new(),
     }];
 
-    for _ in 0..30 {
+    for _ in 0..26 {
         println!("{}", current_states.len());
         let mut next_states = vec![];
         // println!();
@@ -46,10 +47,11 @@ fn prune(states: Vec<State>) -> Vec<State> {
     let mut best_states = HashMap::new();
 
     'outer: for state in states {
-        if !best_states.contains_key(state.current_position) {
-            best_states.insert(state.current_position, vec![state]);
+        let state_position = state.current_position_me.to_string() + state.current_position_el;
+        if !best_states.contains_key(&state_position) {
+            best_states.insert(state_position, vec![state]);
         } else {
-            let best_states = best_states.get_mut(state.current_position).unwrap();
+            let best_states = best_states.get_mut(&state_position).unwrap();
             for best_state in best_states.iter() {
                 if state.total_release <= best_state.total_release && state.current_release <= best_state.current_release {
                     continue 'outer;
@@ -69,72 +71,81 @@ fn prune(states: Vec<State>) -> Vec<State> {
 }
 
 fn get_next_states<'a>(valves: &'a HashMap<String, Valve>, state: &State<'a>) -> Vec<State<'a>> {
-    let mut next_states = vec![];
+    let mut next_states_me = vec![];
 
     let next_total_release = state.total_release + state.current_release;
     if state.opened_valves.len() != valves.len() {
-        if !state.opened_valves.contains(state.current_position) {
+        if !state.opened_valves.contains(state.current_position_me) {
             let mut next_opened_valves = state.opened_valves.clone();
-            next_opened_valves.insert(state.current_position);
-            next_states.push(State {
-                current_position: state.current_position,
-                current_release: state.current_release + valves.get(state.current_position).unwrap().rate,
+            next_opened_valves.insert(state.current_position_me);
+            next_states_me.push(State {
+                current_position_me: state.current_position_me,
+                current_position_el: state.current_position_el,
+                current_release: state.current_release + valves.get(state.current_position_me).unwrap().rate,
                 total_release: next_total_release,
                 opened_valves: next_opened_valves,
             });
         }
-        for lead_to in &valves.get(state.current_position).unwrap().leads_to {
-            next_states.push(State {
-                current_position: lead_to,
+        for lead_to in &valves.get(state.current_position_me).unwrap().leads_to {
+            next_states_me.push(State {
+                current_position_me: lead_to,
+                current_position_el: state.current_position_el,
                 current_release: state.current_release,
                 total_release: next_total_release,
                 opened_valves: state.opened_valves.clone(),
             });
         }
     } else {
-        next_states.push(State {
-            current_position: state.current_position,
+        next_states_me.push(State {
+            current_position_me: state.current_position_me,
+            current_position_el: state.current_position_el,
             current_release: state.current_release,
             total_release: next_total_release,
             opened_valves: state.opened_valves.clone(),
         });
     }
 
-
-    next_states
-}
-
-fn has_better(visited_states: &HashMap<StateHash, i32>, hash: &StateHash, total_release: i32) -> bool {
-    let result = visited_states.get(hash);
-    match result {
-        None => false,
-        Some(existing_total_release) => *existing_total_release >= total_release
+    let mut next_states_el = vec![];
+    for state in next_states_me {
+        if state.opened_valves.len() != valves.len() {
+            if !state.opened_valves.contains(state.current_position_el) {
+                let mut next_opened_valves = state.opened_valves.clone();
+                next_opened_valves.insert(state.current_position_el);
+                next_states_el.push(State {
+                    current_position_me: state.current_position_me,
+                    current_position_el: state.current_position_el,
+                    current_release: state.current_release + valves.get(state.current_position_el).unwrap().rate,
+                    total_release: next_total_release,
+                    opened_valves: next_opened_valves,
+                });
+            }
+            for lead_to in &valves.get(state.current_position_el).unwrap().leads_to {
+                next_states_el.push(State {
+                    current_position_me: state.current_position_me,
+                    current_position_el: lead_to,
+                    current_release: state.current_release,
+                    total_release: next_total_release,
+                    opened_valves: state.opened_valves.clone(),
+                });
+            }
+        } else {
+            next_states_el.push(State {
+                current_position_me: state.current_position_me,
+                current_position_el: state.current_position_el,
+                current_release: state.current_release,
+                total_release: next_total_release,
+                opened_valves: state.opened_valves.clone(),
+            });
+        }
     }
-}
 
-impl<'a> State<'a> {
-    fn to_hashable(&self) -> (StateHash, i32) {
-        let mut opened_valves: Vec<String> = self.opened_valves.iter().map(|a| { a.to_string() }).collect();
-        opened_valves.sort();
-        (
-            StateHash {
-                current_position: self.current_position.to_string(),
-                opened_valves,
-            },
-            self.total_release
-        )
-    }
-}
-
-#[derive(Eq, Hash, PartialEq, Debug)]
-struct StateHash {
-    current_position: String,
-    opened_valves: Vec<String>,
+    next_states_el
 }
 
 #[derive(Debug)]
 struct State<'a> {
-    current_position: &'a str,
+    current_position_me: &'a str,
+    current_position_el: &'a str,
     current_release: i32,
     total_release: i32,
     opened_valves: HashSet<&'a str>,
