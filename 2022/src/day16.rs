@@ -46,7 +46,7 @@ pub fn day16_2(str: &str) {
 fn prune(states: Vec<State>) -> Vec<State> {
     let mut best_states = HashMap::new();
 
-    'outer: for state in states {
+    'outer: for state in &states {
         let state_position = state.current_position_me.to_string() + state.current_position_el;
         if !best_states.contains_key(&state_position) {
             best_states.insert(state_position, vec![state]);
@@ -57,16 +57,25 @@ fn prune(states: Vec<State>) -> Vec<State> {
                     continue 'outer;
                 }
             }
-            best_states.push(state);
+            best_states.push(&state);
         }
     }
 
     let mut result = vec![];
-    for (_pos, states) in best_states {
-        for state in states {
+    for (_str,states) in &best_states {
+        'outer: for state in states {
+            let state = (*state).clone();
+            let state_position = state.current_position_me.to_string() + state.current_position_el;
+            for best_state in best_states.get(&state_position).unwrap() {
+                if state.total_release < best_state.total_release && state.current_release < best_state.current_release {
+                    continue 'outer;
+                }
+            }
+
             result.push(state);
         }
     }
+
     result
 }
 
@@ -142,7 +151,7 @@ fn get_next_states<'a>(valves: &'a HashMap<String, Valve>, state: &State<'a>) ->
     next_states_el
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct State<'a> {
     current_position_me: &'a str,
     current_position_el: &'a str,
