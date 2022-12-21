@@ -1,5 +1,4 @@
 use std::collections::{HashMap, HashSet};
-use std::hash::{Hash};
 use regex::Regex;
 
 pub fn day16_2(str: &str) {
@@ -62,17 +61,15 @@ fn prune(states: Vec<State>) -> Vec<State> {
     }
 
     let mut result = vec![];
-    for (_str,states) in &best_states {
-        'outer: for state in states {
-            let state = (*state).clone();
-            let state_position = state.current_position_me.to_string() + state.current_position_el;
-            for best_state in best_states.get(&state_position).unwrap() {
-                if state.total_release < best_state.total_release && state.current_release < best_state.current_release {
+    for (_str, states) in &best_states {
+        'outer: for (i, state) in states.iter().enumerate() {
+            for (j, best_state) in states.iter().enumerate() {
+                if i != j && state.total_release <= best_state.total_release && state.current_release <= best_state.current_release {
                     continue 'outer;
                 }
             }
 
-            result.push(state);
+            result.push((*state).clone());
         }
     }
 
