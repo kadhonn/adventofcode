@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 use regex::Regex;
 
-const ROUNDS: i32 = 24;
+const ROUNDS: i32 = 32;
 
 pub fn day19_1(str: &String) {
     let blueprints = parse_blueprints(str);
@@ -16,6 +16,20 @@ pub fn day19_1(str: &String) {
     }
 
     println!("{}", sum);
+}
+
+pub fn day19_2(str: &String) {
+    let blueprints = parse_blueprints(str);
+
+    let mut prod = 1;
+    for i in 0..(3.max(blueprints.len())) {
+        let blueprint = blueprints[i];
+        let best_result = get_best(blueprint);
+        prod *= best_result;
+        println!("result: {}", best_result);
+    }
+
+    println!("{}", prod);
 }
 
 fn get_best(blueprint: Blueprint) -> i32 {
@@ -44,22 +58,46 @@ fn prune(round: i32, states: Vec<State>) -> Vec<State> {
     let rounds_till_end = ROUNDS - round - 1;
     let max_geodes_till_end: i32 = (1..rounds_till_end).sum();
 
-    // println!("{}", rounds_till_end);
-    // println!("{}", max_geodes_till_end);
-
     let mut max_cur = 0;
     for state in states.iter() {
         max_cur = max_cur.max(state.geodes);
     }
 
     let mut next_states = vec![];
+    let mut best = states[0];
     for state in states {
         if state.geodes + state.geode_robots * rounds_till_end + max_geodes_till_end >= max_cur {
             next_states.push(state);
+
+            if state.total_ore > best.total_ore
+                && state.total_clay > best.total_clay
+                && state.total_obsidian > best.total_obsidian
+                && state.total_geodes > best.total_geodes
+                && state.ore_robots > best.ore_robots
+                && state.clay_robots > best.clay_robots
+                && state.obsidian_robots > best.obsidian_robots
+                && state.geode_robots > best.geode_robots {
+                best = state.clone();
+            }
         }
     }
 
-    let hashed: HashSet<State> = HashSet::from_iter(next_states.into_iter());
+    let mut bests: Vec<State> = vec![];
+    'outer: for state in next_states.into_iter() {
+        if state.total_ore < best.total_ore
+            && state.total_clay < best.total_clay
+            && state.total_obsidian < best.total_obsidian
+            && state.total_geodes < best.total_geodes
+            && state.ore_robots < best.ore_robots
+            && state.clay_robots < best.clay_robots
+            && state.obsidian_robots < best.obsidian_robots
+            && state.geode_robots < best.geode_robots {
+            continue 'outer;
+        }
+        bests.push(state);
+    }
+
+    let hashed: HashSet<State> = HashSet::from_iter(bests.into_iter());
     hashed.into_iter().collect()
 }
 
@@ -116,11 +154,19 @@ fn collect_ore(state: State) -> State {
     state.clay += state.clay_robots;
     state.obsidian += state.obsidian_robots;
     state.geodes += state.geode_robots;
+    state.total_ore += state.ore_robots;
+    state.total_clay += state.clay_robots;
+    state.total_obsidian += state.obsidian_robots;
+    state.total_geodes += state.geode_robots;
     state
 }
 
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
+#[derive(Copy, Clone)]
 struct State {
+    total_ore: i32,
+    total_clay: i32,
+    total_obsidian: i32,
+    total_geodes: i32,
     ore: i32,
     clay: i32,
     obsidian: i32,
@@ -130,26 +176,34 @@ struct State {
     obsidian_robots: i32,
     geode_robots: i32,
 }
-//
-// impl PartialEq<Self> for State {
-//     fn eq(&self, other: &Self) -> bool {
-//         return self.ore_robots == other.ore_robots
-//             && self.clay_robots == other.clay_robots
-//             && self.obsidian_robots == other.obsidian_robots
-//             && self.geode_robots == other.geode_robots;
-//     }
-// }
-//
-// impl Eq for State {}
-//
-// impl Hash for State {
-//     fn hash<H: Hasher>(&self, state: &mut H) {
-//         self.ore_robots.hash(state);
-//         self.clay_robots.hash(state);
-//         self.obsidian_robots.hash(state);
-//         self.geode_robots.hash(state);
-//     }
-// }
+
+impl PartialEq<Self> for State {
+    fn eq(&self, other: &Self) -> bool {
+        return self.ore_robots == other.ore_robots
+            && self.clay_robots == other.clay_robots
+            && self.obsidian_robots == other.obsidian_robots
+            && self.geode_robots == other.geode_robots
+            && self.total_ore == other.total_ore
+            && self.total_clay == other.total_clay
+            && self.total_obsidian == other.total_obsidian
+            && self.total_geodes == other.total_geodes;
+    }
+}
+
+impl Eq for State {}
+
+impl Hash for State {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ore_robots.hash(state);
+        self.clay_robots.hash(state);
+        self.obsidian_robots.hash(state);
+        self.geode_robots.hash(state);
+        self.total_ore.hash(state);
+        self.total_clay.hash(state);
+        self.total_obsidian.hash(state);
+        self.total_geodes.hash(state);
+    }
+}
 
 impl State {
     fn new() -> State {
@@ -162,6 +216,10 @@ impl State {
             clay_robots: 0,
             obsidian_robots: 0,
             geode_robots: 0,
+            total_ore: 0,
+            total_clay: 0,
+            total_obsidian: 0,
+            total_geodes: 0,
         }
     }
 }
