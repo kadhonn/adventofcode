@@ -1,35 +1,37 @@
 pub fn day20_1(str: &String) {
-    let numbers: Vec<i32> = str.trim().lines().map(|l| { l.parse().unwrap() }).collect();
+    let numbers: Vec<i64> = str.trim().lines().map(|l| { l.parse().unwrap() }).map(|a: i64| { 811589153 * a }).collect();
     let mut dll = make_dll(numbers.len());
 
     // print_something(&numbers, &dll);
-    for i in 0..numbers.len() {
-        let steps = numbers[i];
-        if steps == 0 {
-            continue;
-        }
-        let mut current = i;
-        {
-            let current_pointers = dll[i];
-            dll[current_pointers.0].1 = current_pointers.1;
-            dll[current_pointers.1].0 = current_pointers.0;
-        }
-        if steps > 0 {
-            for _ in 0..steps {
-                current = dll[current].1;
+    for _j in 0..10 {
+        for i in 0..numbers.len() {
+            let steps = numbers[i] % (numbers.len() as i64 - 1);
+            if steps == 0 {
+                continue;
             }
-        } else {
-            for _ in steps..=0 {
-                current = dll[current].0;
+            let mut current = i;
+            {
+                let current_pointers = dll[i];
+                dll[current_pointers.0].1 = current_pointers.1;
+                dll[current_pointers.1].0 = current_pointers.0;
             }
-        }
-        let next = dll[current].1;
-        dll[current].1 = i;
-        dll[next].0 = i;
-        dll[i].0 = current;
-        dll[i].1 = next;
+            if steps > 0 {
+                for _ in 0..steps {
+                    current = dll[current].1;
+                }
+            } else {
+                for _ in steps..=0 {
+                    current = dll[current].0;
+                }
+            }
+            let next = dll[current].1;
+            dll[current].1 = i;
+            dll[next].0 = i;
+            dll[i].0 = current;
+            dll[i].1 = next;
 
-        // print_something(&numbers, &dll);
+            // print_something(&numbers, &dll);
+        }
     }
 
     let mut zero_i = 0;
@@ -52,7 +54,7 @@ pub fn day20_1(str: &String) {
     println!("{}", sum);
 }
 
-fn print_something(numbers: &Vec<i32>, dll: &Vec<(usize, usize)>) {
+fn print_something(numbers: &Vec<i64>, dll: &Vec<(usize, usize)>) {
     let mut i = 0;
     let start = dll[dll[0].0];
     let mut current = start;
