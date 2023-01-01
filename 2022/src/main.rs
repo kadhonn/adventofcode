@@ -4,10 +4,10 @@ extern crate core;
 
 use std::fs;
 
-mod day24;
+mod day25;
 
 fn main() {
-    // let str = fs::read_to_string("in/in24_ex.txt").unwrap();
-    let str = fs::read_to_string("in/in24.txt").unwrap();
-    day24::day24_1(&str);
+    // let str = fs::read_to_string("in/in25_ex.txt").unwrap();
+    let str = fs::read_to_string("in/in25.txt").unwrap();
+    day25::day25_1(&str);
 }
