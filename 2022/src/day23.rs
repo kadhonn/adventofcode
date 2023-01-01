@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-pub fn day23_1(str: &str) {
+pub fn day23_2(str: &str) {
     let mut field = parse_field(str);
 
     let mut dirs_i = 0;
@@ -11,7 +11,8 @@ pub fn day23_1(str: &str) {
         [(1, -1), (1, 0), (1, 1)],
     ];
 
-    for _ in 0..10 {
+    let mut i = 1;
+    loop {
         let mut proposed: HashMap<(i32, i32), Option<(i32, i32)>> = HashMap::new();
 
         for elf in &field {
@@ -25,32 +26,24 @@ pub fn day23_1(str: &str) {
             }
         }
 
+        let mut moved = false;
         for proposed_move in proposed.keys() {
             let elf_moved = proposed[proposed_move];
             if let Some(elf) = elf_moved {
                 field.remove(&elf);
                 field.insert(proposed_move.clone());
+                moved = true;
             }
+        }
+        if !moved {
+            break;
         }
 
         dirs_i += 1;
+        i += 1;
     }
 
-    let mut min_x = 100000;
-    let mut max_x = -100000;
-    let mut min_y = 100000;
-    let mut max_y = -100000;
-    for elf in &field {
-        min_x = min_x.min(elf.0);
-        max_x = max_x.max(elf.0);
-        min_y = min_y.min(elf.1);
-        max_y = max_y.max(elf.1);
-    }
-
-    let field_size = (max_x - min_x + 1) * (max_y - min_y + 1);
-    let empty_space = field_size - field.len() as i32;
-
-    println!("{}", empty_space);
+    println!("{}", i);
 }
 
 fn get_proposed_move(elf: (i32, i32), field: &HashSet<(i32, i32)>, dirs: &[[(i32, i32); 3]; 4], dirs_i: usize) -> Option<(i32, i32)> {
