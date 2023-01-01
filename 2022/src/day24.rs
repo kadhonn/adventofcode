@@ -5,28 +5,34 @@ pub fn day24_1(str: &str) {
     let (start, end, field) = parse_field(str);
 
     let mut cache = vec![field];
-    let start_state = (0, start);
+    let start_state = (0, start, 0);
 
     let mut queue = PriorityQueue::new();
-    queue.push(start_state, get_priority(start_state, end));
+    queue.push(start_state, get_priority(start_state, end, start));
 
 
     loop {
-        let state = queue.pop().expect("oh no, queue is empty").0;
-        if state.1.0 == end.0 && state.1.1 == end.1 {
+        let mut state = queue.pop().expect("oh no, queue is empty").0;
+        if state.2 == 2 && state.1.0 == end.0 && state.1.1 == end.1 {
             println!("found exit after {} minutes", state.0);
             break;
+        }
+        if state.2 == 0 && state.1.0 == end.0 && state.1.1 == end.1 {
+            state.2 = 1;
+        }
+        if state.2 == 1 && state.1.0 == start.0 && state.1.1 == start.1 {
+            state.2 = 2;
         }
 
         let next_states = get_next_states(state, &mut cache);
 
         for next_state in next_states {
-            queue.push(next_state, get_priority(next_state, end));
+            queue.push(next_state, get_priority(next_state, end, start));
         }
     }
 }
 
-fn get_next_states(state: (i32, (i32, i32)), cache: &mut Vec<Vec<Vec<State>>>) -> Vec<(i32, (i32, i32))> {
+fn get_next_states(state: (i32, (i32, i32), i32), cache: &mut Vec<Vec<Vec<State>>>) -> Vec<(i32, (i32, i32), i32)> {
     let mut result = vec![];
 
     let next_field = get_field(state.0 + 1, cache);
@@ -41,7 +47,7 @@ fn get_next_states(state: (i32, (i32, i32)), cache: &mut Vec<Vec<Vec<State>>>) -
         let new_pos = (state.1.0 + dir.0, state.1.1 + dir.1);
         if new_pos.0 >= 0 && new_pos.0 <= next_field[0].len() as i32 - 1 && new_pos.1 >= 0 && new_pos.1 <= next_field.len() as i32 - 1 {
             if next_field[new_pos.1 as usize][new_pos.0 as usize] == Nothing {
-                result.push((state.0 + 1, new_pos));
+                result.push((state.0 + 1, new_pos, state.2));
             }
         }
     }
@@ -129,8 +135,10 @@ fn fix_pos(pos: (i32, i32), field: &Vec<Vec<State>>) -> (i32, i32) {
     (x, y)
 }
 
-fn get_priority(state: (i32, (i32, i32)), end: (i32, i32)) -> i32 {
-    return -(state.0 + (end.0 - state.1.0).abs() + (end.1 - state.1.1).abs());
+fn get_priority(state: (i32, (i32, i32), i32), end: (i32, i32), start: (i32, i32)) -> i32 {
+    let mut prio = state.0 + (end.0 - state.1.0).abs() + (end.1 - state.1.1).abs();
+    prio += ((end.0 - start.0).abs() + (end.1 - start.1).abs()) * 2 - state.2;
+    return -(prio);
 }
 
 fn parse_field(str: &str) -> ((i32, i32), (i32, i32), Vec<Vec<State>>) {
