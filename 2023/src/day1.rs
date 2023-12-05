@@ -23,20 +23,55 @@ pub fn day1_1(str: &str) {
 }
 
 pub fn day1_2(str: &str) {
-    let mut calories_vec: Vec<i32> = vec!();
-    for elf in str.split("\r\n\r\n") {
-        let mut calories = 0;
-        for item in elf.split("\r\n") {
-            if item.len() > 0 {
-                calories += item.parse::<i32>().unwrap();
+    let mut sum = 0;
+    let mut first: i32;
+    let mut last: i32;
+    for line in str.split("\n") {
+        if line.is_empty() {
+            continue;
+        }
+        first = -1;
+        last = -1;
+        for (i, char) in line.char_indices() {
+            let mut digit: i32 = -1;
+            if char.is_digit(10) {
+                digit = char.to_digit(10).unwrap() as i32;
+            }
+            if line[i..line.len()].starts_with("one") {
+                digit = 1
+            }
+            if line[i..line.len()].starts_with("two") {
+                digit = 2
+            }
+            if line[i..line.len()].starts_with("three") {
+                digit = 3
+            }
+            if line[i..line.len()].starts_with("four") {
+                digit = 4
+            }
+            if line[i..line.len()].starts_with("five") {
+                digit = 5
+            }
+            if line[i..line.len()].starts_with("six") {
+                digit = 6
+            }
+            if line[i..line.len()].starts_with("seven") {
+                digit = 7
+            }
+            if line[i..line.len()].starts_with("eight") {
+                digit = 8
+            }
+            if line[i..line.len()].starts_with("nine") {
+                digit = 9
+            }
+            if digit != -1 {
+                if first == -1 {
+                    first = digit
+                }
+                last = digit
             }
         }
-        calories_vec.push(calories);
+        sum += first * 10 + last
     }
-    calories_vec.sort();
-    let mut sum = 0;
-    for i in 0..3 {
-        sum += calories_vec[calories_vec.len() - 1 - i];
-    }
-    println!("{}", sum);
+    println!("{}", sum)
 }
