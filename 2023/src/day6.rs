@@ -54,15 +54,24 @@ pub fn day6_2(str: &str) {
         max_distances.push_str(distances_split[distance].trim());
     }
 
-    let mut count = 0;
     let time = times.parse::<i64>().unwrap();
     let to_beat = max_distances.parse::<i64>().unwrap();
+    let mut start = 0;
     for chargeup in 1..time {
         let result = (time - chargeup) * chargeup;
         if result > to_beat {
-            count += 1;
+            start = chargeup;
+            break;
+        }
+    }
+    let mut end = 0;
+    for chargeup in (1..time).rev() {
+        let result = (time - chargeup) * chargeup;
+        if result > to_beat {
+            end = chargeup;
+            break;
         }
     }
 
-    println!("{}", count);
+    println!("{}", end - start +1);
 }
