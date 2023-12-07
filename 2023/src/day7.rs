@@ -10,46 +10,48 @@ struct Hand<'a> {
 
 impl<'a> Hand<'a> {
     fn hand_type(&self) -> i32 {
-        if self.is_five_of_a_kind() {
-            return 7;
-        }
-        if self.is_four_of_a_kind() {
-            return 6;
-        }
-        if self.is_full_house() {
-            return 5;
-        }
-        if self.is_three_of_a_kind() {
-            return 4;
-        }
-        if self.is_two_pair() {
-            return 3;
-        }
-        if self.is_pair() {
-            return 2;
-        }
-        return 1;
+        let groups = self.group();
+        return groups.iter().map(|group| {
+            if self.is_five_of_a_kind(group) {
+                return 7;
+            }
+            if self.is_four_of_a_kind(group) {
+                return 6;
+            }
+            if self.is_full_house(group) {
+                return 5;
+            }
+            if self.is_three_of_a_kind(group) {
+                return 4;
+            }
+            if self.is_two_pair(group) {
+                return 3;
+            }
+            if self.is_pair(group) {
+                return 2;
+            }
+            return 1;
+        }).max().unwrap();
     }
-    fn is_five_of_a_kind(&self) -> bool {
-        return self.group().len() == 1;
+    fn is_five_of_a_kind(&self, group: &HashMap<char, i32>) -> bool {
+        return group.iter().any(|entry| *entry.1 == 5);
     }
-    fn is_four_of_a_kind(&self) -> bool {
-        return self.group().iter().any(|entry| *entry.1 == 4);
+    fn is_four_of_a_kind(&self, group: &HashMap<char, i32>) -> bool {
+        return group.iter().any(|entry| *entry.1 == 4);
     }
-    fn is_full_house(&self) -> bool {
-        let group = self.group();
+    fn is_full_house(&self, group: &HashMap<char, i32>) -> bool {
         return group.iter().any(|entry| *entry.1 == 3) && group.iter().any(|entry| *entry.1 == 2);
     }
-    fn is_three_of_a_kind(&self) -> bool {
-        return self.group().iter().any(|entry| *entry.1 == 3);
+    fn is_three_of_a_kind(&self, group: &HashMap<char, i32>) -> bool {
+        return group.iter().any(|entry| *entry.1 == 3);
     }
-    fn is_two_pair(&self) -> bool {
-        return self.group().iter().filter(|entry| *entry.1 == 2).count() == 2;
+    fn is_two_pair(&self, group: &HashMap<char, i32>) -> bool {
+        return group.iter().filter(|entry| *entry.1 == 2).count() == 2;
     }
-    fn is_pair(&self) -> bool {
-        return self.group().iter().filter(|entry| *entry.1 == 2).count() == 1;
+    fn is_pair(&self, group: &HashMap<char, i32>) -> bool {
+        return group.iter().filter(|entry| *entry.1 == 2).count() == 1;
     }
-    fn group(&self) -> HashMap<char, i32> {
+    fn group(&self) -> Vec<HashMap<char, i32>> {
         let mut map = HashMap::new();
         for char in self.cards.chars() {
             if map.contains_key(&char) {
@@ -58,13 +60,35 @@ impl<'a> Hand<'a> {
                 map.insert(char, 1);
             }
         }
-        return map;
+        if !map.contains_key(&'J') {
+            return vec![map];
+        }
+
+        let mut maps = vec![];
+        maps.push(map.clone());
+        let jokers = map.remove(&'J').unwrap();
+        let keys = map.keys().map(|k| *k).collect::<Vec<char>>();
+        add_jokers(&mut maps, &keys, jokers, &map);
+
+        return maps;
+    }
+}
+
+fn add_jokers(maps: &mut Vec<HashMap<char, i32>>, keys: &Vec<char>, jokers: i32, map: &HashMap<char, i32>) {
+    if jokers == 0 {
+        maps.push(map.clone());
+        return;
+    }
+    for key in keys {
+        let mut map = map.clone();
+        map.insert(*key, map[key] + 1);
+        add_jokers(maps, keys, jokers - 1, &map);
     }
 }
 
 
-pub fn day7_1(str: &str) {
-    let mut card_ranking = vec!['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+pub fn day7(str: &str) {
+    let mut card_ranking = vec!['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'];
     card_ranking.reverse();
     let mut hands = str.lines().map(|line| {
         let split = line.split(" ").collect::<Vec<&str>>();
