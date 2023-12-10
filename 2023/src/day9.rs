@@ -33,8 +33,8 @@ pub fn day9(str: &str) {
         let mut change = 0;
         for i in (0..sequences.len()).rev() {
             let last_numbers = &sequences[i];
-            let last_number = last_numbers[last_numbers.len() - 1];
-            change += last_number;
+            let last_number = last_numbers[0];
+            change = last_number - change;
         }
 
         sum += change;
