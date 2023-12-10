@@ -11,13 +11,13 @@ pub fn day10(str: &str) {
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect::<Vec<Vec<char>>>();
 
+    let mut inside: HashSet<(i32, i32)> = HashSet::new();
     let mut visited = HashMap::new();
     let mut next_nodes = LinkedList::new();
     let start_pos = find_start_pos(&map);
     next_nodes.push_back((0, start_pos));
     visited.insert(start_pos, 0);
 
-    let mut max_steps = 0;
     while !next_nodes.is_empty() {
         let (steps, next_node) = next_nodes.pop_front().unwrap();
         for step in get_next_steps(&map, next_node) {
@@ -26,23 +26,86 @@ pub fn day10(str: &str) {
                 visited.insert(step, steps + 1);
             }
         }
+    }
 
-        max_steps = max(steps, max_steps);
+    for y in 0..map.len() {
+        for x in 0..map[y].len() {
+            let key = (x as i32, y as i32);
+            if !visited.contains_key(&key) && is_inside(&map, &visited, &key) {
+                inside.insert(key);
+            }
+        }
     }
 
     for y in 0..map.len() {
         for x in 0..map[y].len() {
             let key = (x as i32, y as i32);
             if visited.contains_key(&key) {
-                print!("{}", visited[&key]);
-            } else {
                 print!("{}", map[y][x]);
+            } else if inside.contains(&key) {
+                print!("#");
+            } else {
+                print!(".");
             }
         }
         println!();
     }
 
-    println!("{max_steps}");
+    println!("{}", inside.len());
+}
+
+fn is_inside(map: &Vec<Vec<char>>, visited: &HashMap<(i32, i32), i32>, key: &(i32, i32)) -> bool {
+    let x = key.0;
+    let y = key.1;
+
+    let mut i;
+
+    if x == 2 && y == 6 {
+        println!("wub");
+    }
+    let mut count_west = 0;
+    i = x - 1;
+    while i >= 0 {
+        if visited.contains_key(&(i, y)) {
+            let start_char = map[y as usize][i as usize];
+            i -= 1;
+            while i >= 0 {
+                let char = map[y as usize][i as usize];
+                if !visited.contains_key(&(i, y)) || (char != '-' && char != 'F' && char != 'L') {
+                    break;
+                }
+                i -= 1;
+            }
+            i += 1;
+            if !(start_char == '7' && map[y as usize][i as usize] == 'F' || start_char == 'J' && map[y as usize][i as usize] == 'L') {
+                count_west += 1;
+            }
+        }
+        i -= 1;
+    }
+
+    let mut count_north = 0;
+    i = y - 1;
+    while i >= 0 {
+        if visited.contains_key(&(x, i)) {
+            let start_char = map[i as usize][x as usize];
+            i -= 1;
+            while i >= 0 {
+                let char = map[i as usize][x as usize];
+                if !visited.contains_key(&(x, i)) || (char != '|' && char != 'F' && char != '7') {
+                    break;
+                }
+                i -= 1;
+            }
+            i += 1;
+            if !(start_char == 'J' && map[i as usize][x as usize] == '7' || start_char == 'L' && map[i as usize][x as usize] == 'F') {
+                count_north += 1;
+            }
+        }
+        i -= 1;
+    }
+
+    return count_north % 2 == 1 && count_west % 2 == 1;
 }
 
 fn get_next_steps(map: &Vec<Vec<char>>, pos: (i32, i32)) -> Vec<(i32, i32)> {
