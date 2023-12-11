@@ -12,12 +12,12 @@ pub fn day11(str: &str) {
     let mut y_expand = 0;
     for y in 0..lines.len() {
         if (0..lines[y].len()).map(|i| lines[y][i]).all(|c| c == '.') {
-            y_expand += 1;
+            y_expand += 1000000 -1 ;
         } else {
             let mut x_expand = 0;
             for x in 0..lines[y].len() {
                 if (0..lines.len()).map(|i| lines[i][x]).all(|c| c == '.') {
-                    x_expand += 1;
+                    x_expand += 1000000 -1;
                 }
                 if lines[y][x] == '#' {
                     map.push((y + y_expand, x + x_expand));
