@@ -11,6 +11,7 @@ pub fn day13(str: &str) {
         let field: Vec<Vec<char>> = field.lines().map(|line| line.chars().collect()).collect();
 
         'line: for y in 0..field.len() - 1 {
+            let mut err_count = 0;
             for i in 1..field.len() - y {
                 if y < i - 1 {
                     break;
@@ -19,15 +20,21 @@ pub fn day13(str: &str) {
                 let y2 = y - (i - 1);
                 for x in 0..field[y].len() {
                     if field[y1][x] != field[y2][x] {
-                        continue 'line;
+                        err_count += 1;
+                        if err_count > 1 {
+                            continue 'line;
+                        }
                     }
                 }
             }
-            sum += (y + 1) * 100;
-            continue 'fields;
+            if err_count == 1 {
+                sum += (y + 1) * 100;
+                continue 'fields;
+            }
         }
 
         'col: for x in 0..field[0].len() - 1 {
+            let mut err_count = 0;
             for i in 1..field[0].len() - x {
                 if x < i - 1 {
                     break;
@@ -36,12 +43,17 @@ pub fn day13(str: &str) {
                 let x2 = x - (i - 1);
                 for y in 0..field.len() {
                     if field[y][x1] != field[y][x2] {
-                        continue 'col;
+                        err_count += 1;
+                        if err_count > 1 {
+                            continue 'col;
+                        }
                     }
                 }
             }
-            sum += x + 1;
-            continue 'fields;
+            if err_count == 1 {
+                sum += x + 1;
+                continue 'fields;
+            }
         }
     }
 
