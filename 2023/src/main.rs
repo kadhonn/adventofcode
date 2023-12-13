@@ -5,12 +5,12 @@ extern crate core;
 use std::fs;
 use std::time::Instant;
 
-mod day12;
+mod day13;
 
 fn main() {
     let before = Instant::now();
-    // let str = fs::read_to_string("in/in12_ex.txt").unwrap();
-    let str = fs::read_to_string("in/in12.txt").unwrap();
-    day12::day12(&str.trim());
+    // let str = fs::read_to_string("in/in13_ex.txt").unwrap();
+    let str = fs::read_to_string("in/in13.txt").unwrap();
+    day13::day13(&str.trim());
     println!("took {:?}", before.elapsed());
 }
