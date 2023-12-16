@@ -14,34 +14,51 @@ const WEST: (i32, i32) = (0, -1);
 
 pub fn day16(str: &str) {
     let field: Vec<Vec<char>> = str.lines().map(|line| line.chars().collect()).collect();
-    let mut visited_states = HashSet::new();
-    let mut states = LinkedList::new();
-    states.push_back(((0, -1), EAST));
+    let mut max = 0;
 
-    while !states.is_empty() {
-        let state = states.pop_front().unwrap();
-        let new_states = get_next_states(&field, state);
-        for new_state in new_states {
-            if !visited_states.contains(&new_state) {
-                visited_states.insert(new_state);
-                states.push_back(new_state);
-            }
-        }
-    }
+    let mut start_pos: Vec<((i32, i32), (i32, i32))> = vec![];
 
-    let visited_fields = visited_states.iter().map(|it| (*it).0).collect::<HashSet<(i32, i32)>>();
     for y in 0..field.len() {
-        for x in 0..field.len() {
-            if visited_fields.contains(&(y as i32, x as i32)) {
-                print!("#");
-            } else {
-                print!(".");
+        start_pos.push(((y as i32, -1), EAST));
+        start_pos.push(((y as i32, field[y].len() as i32), WEST));
+    }
+    for x in 0..field[0].len() {
+        start_pos.push(((-1, x as i32), SOUTH));
+        start_pos.push(((field.len() as i32, x as i32), NORTH));
+    }
+
+    for start_pos in start_pos {
+        let mut visited_states = HashSet::new();
+        let mut states = LinkedList::new();
+        states.push_back(start_pos);
+
+        while !states.is_empty() {
+            let state = states.pop_front().unwrap();
+            let new_states = get_next_states(&field, state);
+            for new_state in new_states {
+                if !visited_states.contains(&new_state) {
+                    visited_states.insert(new_state);
+                    states.push_back(new_state);
+                }
             }
         }
-        println!();
+
+        let visited_fields = visited_states.iter().map(|it| (*it).0).collect::<HashSet<(i32, i32)>>();
+        // for y in 0..field.len() {
+        //     for x in 0..field.len() {
+        //         if visited_fields.contains(&(y as i32, x as i32)) {
+        //             print!("#");
+        //         } else {
+        //             print!(".");
+        //         }
+        //     }
+        //     println!();
+        // }
+        let sum = visited_fields.len() as i32;
+        max = i32::max(sum, max);
     }
-    let sum = visited_fields.len();
-    println!("{sum}");
+
+    println!("{max}");
 }
 
 fn get_next_states(field: &Vec<Vec<char>>, state: ((i32, i32), (i32, i32))) -> Vec<((i32, i32), (i32, i32))> {
