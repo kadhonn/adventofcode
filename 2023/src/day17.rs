@@ -20,10 +20,14 @@ pub fn day17(str: &str) {
     let mut visited_fields = HashMap::new();
     //((y, x), (y_dir, x_dir), length)
     next_steps.push(((0i32, 0i32), EAST, 0i32, 0i32, vec![]), i32::MAX);
+    next_steps.push(((0i32, 0i32), SOUTH, 0i32, 0i32, vec![]), i32::MAX);
 
     while !next_steps.is_empty() {
         let (((y, x), (y_dir, x_dir), length, cost, path), _) = next_steps.pop().unwrap();
         if y == field.len() as i32 - 1 && x == field[y as usize].len() as i32 - 1 {
+            if length < 4 {
+                continue;
+            }
             println!("{cost}");
             for y in 0..field.len() {
                 for x in 0..field[y].len() {
@@ -66,14 +70,16 @@ pub fn day17(str: &str) {
 fn get_steps(y: i32, x: i32, y_dir: i32, x_dir: i32, length: i32) -> Vec<((i32, i32), (i32, i32), i32)> {
     let mut steps = vec![];
 
-    if (y_dir, x_dir) == NORTH || (y_dir, x_dir) == SOUTH {
-        steps.push(((y + WEST.0, x + WEST.1), WEST, 1));
-        steps.push(((y + EAST.0, x + EAST.1), EAST, 1));
-    } else {
-        steps.push(((y + NORTH.0, x + NORTH.1), NORTH, 1));
-        steps.push(((y + SOUTH.0, x + SOUTH.1), SOUTH, 1));
+    if length >= 4 {
+        if (y_dir, x_dir) == NORTH || (y_dir, x_dir) == SOUTH {
+            steps.push(((y + WEST.0, x + WEST.1), WEST, 1));
+            steps.push(((y + EAST.0, x + EAST.1), EAST, 1));
+        } else {
+            steps.push(((y + NORTH.0, x + NORTH.1), NORTH, 1));
+            steps.push(((y + SOUTH.0, x + SOUTH.1), SOUTH, 1));
+        }
     }
-    if length < 3 {
+    if length < 10 {
         steps.push(((y + y_dir, x + x_dir), (y_dir, x_dir), length + 1));
     }
 
