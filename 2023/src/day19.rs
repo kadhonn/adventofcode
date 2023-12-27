@@ -10,14 +10,15 @@ use priority_queue::PriorityQueue;
 use regex::Regex;
 
 
+#[derive(Copy, Clone)]
 struct Check<'a> {
     field_name: Option<&'a str>,
     operator: Operator,
-    value: Option<i32>,
+    value: Option<i64>,
     result: &'a str,
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Copy, Clone)]
 enum Operator {
     NONE,
     LESS,
@@ -35,56 +36,101 @@ pub fn day19(str: &str) {
         workflows.insert(name, checks);
     }
 
-    let mut sum = 0;
-    for part_string in split[1].lines() {
-        let part = parse_part(part_string);
-        if is_accepted(&workflows, &part) {
-            sum += part.values().sum::<i32>();
-        }
-    }
+    let sum = recursive_travel(&workflows, &mut vec![], "in");
+
+
     println!("{sum}");
 }
 
-fn is_accepted(workflows: &HashMap<&str, Vec<Check>>, part: &HashMap<&str, i32>) -> bool {
-    let mut current = "in";
-    'workflows: while true {
-        if current == "A" {
-            return true;
-        }
-        if current == "R" {
-            return false;
-        }
-        let workflow = &workflows[current];
-        for check in workflow {
-            if check.operator == Operator::NONE {
-                current = check.result;
-                continue 'workflows;
-            }
-            if check.operator == Operator::GREATER {
-                if part[check.field_name.unwrap()] > check.value.unwrap() {
-                    current = check.result;
-                    continue 'workflows;
-                }
-            }
-            if check.operator == Operator::LESS {
-                if part[check.field_name.unwrap()] < check.value.unwrap() {
-                    current = check.result;
-                    continue 'workflows;
-                }
-            }
-        }
+fn recursive_travel<'a>(workflows: &'a HashMap<&str, Vec<Check<'a>>>, path: &mut Vec<Check<'a>>, current: &str) -> i64 {
+    if current == "R" {
+        return 0;
     }
-    panic!("wat")
+    if current == "A" {
+        return calc_path(path);
+    }
+
+    let mut sum = 0i64;
+    let workflow = &workflows[current];
+    let orig_len = path.len();
+    for check in workflow {
+        path.push(*check);
+        sum += recursive_travel(workflows, path, check.result);
+        path.remove(path.len() - 1);
+        path.push(reverse(*check));
+    }
+    path.truncate(orig_len);
+
+    return sum;
 }
 
-fn parse_part(part_string: &str) -> HashMap<&str, i32> {
-    let substring = &part_string[1..part_string.len() - 1];
-    let mut part = HashMap::new();
-    for prop in substring.split(',') {
-        let split: Vec<&str> = prop.split('=').collect();
-        part.insert(split[0], split[1].parse().unwrap());
+fn calc_path(path: &Vec<Check>) -> i64 {
+    let mut x_min = 1;
+    let mut x_max = 4000;
+    let mut m_min = 1;
+    let mut m_max = 4000;
+    let mut a_min = 1;
+    let mut a_max = 4000;
+    let mut s_min = 1;
+    let mut s_max = 4000;
+
+    for check in path.iter().rev() {
+        if check.operator == Operator::GREATER {
+            if check.field_name.unwrap() == "x" {
+                x_min = i64::max(x_min, check.value.unwrap() + 1);
+            }
+            if check.field_name.unwrap() == "m" {
+                m_min = i64::max(m_min, check.value.unwrap() + 1);
+            }
+            if check.field_name.unwrap() == "a" {
+                a_min = i64::max(a_min, check.value.unwrap() + 1);
+            }
+            if check.field_name.unwrap() == "s" {
+                s_min = i64::max(s_min, check.value.unwrap() + 1);
+            }
+        }
+        if check.operator == Operator::LESS {
+            if check.field_name.unwrap() == "x" {
+                x_max = i64::min(x_max, check.value.unwrap() - 1);
+            }
+            if check.field_name.unwrap() == "m" {
+                m_max = i64::min(m_max, check.value.unwrap() - 1);
+            }
+            if check.field_name.unwrap() == "a" {
+                a_max = i64::min(a_max, check.value.unwrap() - 1);
+            }
+            if check.field_name.unwrap() == "s" {
+                s_max = i64::min(s_max, check.value.unwrap() - 1);
+            }
+        }
     }
-    return part;
+
+    return i64::max(x_max - x_min + 1, 0)
+        * i64::max(m_max - m_min + 1, 0)
+        * i64::max(a_max - a_min + 1, 0)
+        * i64::max(s_max - s_min + 1, 0);
+}
+
+fn reverse(check: Check) -> Check {
+    return if check.operator == Operator::NONE {
+        check
+    } else {
+        if check.operator == Operator::GREATER {
+            Check {
+                field_name: check.field_name,
+                operator: Operator::LESS,
+                value: Some(check.value.unwrap() + 1),
+                result: check.result,
+            }
+        } else {
+            Check {
+                field_name: check.field_name,
+                operator: Operator::GREATER,
+                value: Some(check.value.unwrap() - 1),
+                result: check.result,
+            }
+        }
+    };
 }
 
 fn parse_check(check_string: &str) -> Check {
@@ -105,7 +151,7 @@ fn parse_check(check_string: &str) -> Check {
     return Check {
         field_name: Some(split[0]),
         operator: operator,
-        value: Some(split[1].parse::<i32>().unwrap()),
+        value: Some(split[1].parse::<i64>().unwrap()),
         result: split[2],
     };
 }
