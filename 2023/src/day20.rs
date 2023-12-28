@@ -74,18 +74,26 @@ pub fn day20(str: &str) {
         }
     }
 
-    let mut low_count = 0;
-    let mut high_count = 0;
-    for _ in 0..1000 {
+    for (_, module) in &all_modules {
+        for next in &module.next {
+            println!("{} -> {}", module.name, next);
+        }
+    }
+
+    let mut i = 0;
+    while true {
+        i += 1;
         let mut queue = LinkedList::new();
         queue.push_back(("broadcaster", "button", false));
 
         while !queue.is_empty() {
             let (dest, from, high) = queue.pop_front().unwrap();
-            if high {
-                high_count += 1;
-            } else {
-                low_count += 1;
+            if dest == "rx" && !high {
+                println!("{i}");
+                return;
+            }
+            if dest == "jz" && high {
+                println!("jz high on {i} from {from}");
             }
             if let Some(module) = all_modules.get(dest) {
                 if module.module_type == BROADCASTER {
@@ -102,7 +110,7 @@ pub fn day20(str: &str) {
                         }
                     }
                 } else if module.module_type == CONJUNCTION {
-                    let mut state = conjunction_memory.get_mut(module.name).unwrap();
+                    let state = conjunction_memory.get_mut(module.name).unwrap();
                     state.insert(from.to_string(), high);
                     let output = state.iter().any(|(_, input)| *input == false);
                     for next in &module.next {
@@ -114,6 +122,4 @@ pub fn day20(str: &str) {
             }
         }
     }
-
-    println!("{}", high_count * low_count);
 }
