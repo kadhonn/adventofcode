@@ -29,20 +29,41 @@ pub fn day21(str: &str) {
         }
     }
 
+    let mut visited = HashSet::new();
+    let mut count = 0i64;
     let mut current = HashSet::new();
     current.insert(start);
-    for _ in 0..64 {
+    let goal = 131*2 *4;
+    // let goal = 500;
+    for i in 0..goal {
         let mut new = HashSet::new();
         for pos in current {
             let dirs = vec![NORTH, SOUTH, WEST, EAST];
             for dir in dirs {
                 let new_pos = (pos.0 + dir.0, pos.1 + dir.1);
-                if map[new_pos.0 as usize][new_pos.1 as usize] == '.' {
-                    new.insert(new_pos);
+                let mut normalized_y = new_pos.0 % map.len() as i32;
+                if normalized_y < 0 {
+                    normalized_y += map.len() as i32;
+                }
+                let mut normalized_x = new_pos.1 % map[normalized_y as usize].len() as i32;
+                if normalized_x < 0 {
+                    normalized_x += map[normalized_y as usize].len() as i32;
+                }
+                if map[normalized_y as usize][normalized_x as usize] == '.' {
+                    if !visited.contains(&new_pos) {
+                        visited.insert(new_pos);
+                        new.insert(new_pos);
+                        if (goal + 0 - i) % 2 == 0 {
+                            count += 1;
+                        }
+                    }
                 }
             }
         }
         current = new;
+        if (i + 1) % (131*2) == 0 {
+            println!("{count}");
+        }
     }
-    println!("{}", current.len());
+    println!("{count}");
 }
