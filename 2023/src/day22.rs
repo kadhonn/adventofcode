@@ -74,15 +74,18 @@ pub fn day22(str: &str) {
 
     let mut count = 0;
     for i in 0..supports.len() {
-        let mut violation = false;
-        for upper in &supports[i] {
-            if is_supported_by[*upper as usize].len() == 1 {
-                violation = true;
-                break;
+        let mut disintegrated = HashSet::new();
+        let mut to_disintegrate = LinkedList::new();
+        to_disintegrate.push_back(i as i32);
+        while !to_disintegrate.is_empty() {
+            let current = to_disintegrate.pop_front().unwrap();
+            disintegrated.insert(current);
+            for upper in &supports[current as usize] {
+                if is_supported_by[*upper as usize].difference(&disintegrated).count() == 0 {
+                    count += 1;
+                    to_disintegrate.push_back(*upper);
+                }
             }
-        }
-        if !violation {
-            count += 1;
         }
     }
 
