@@ -1,5 +1,5 @@
 import System.IO
-import Day2_1
+import Day2_2
 
 main = do
     contents <- readFile "../in.txt"
