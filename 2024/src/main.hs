@@ -1,6 +1,6 @@
 import System.IO
-import Day1_2
+import Day2_1
 
 main = do
     contents <- readFile "../in.txt"
-    print (run contents)
+    run contents
