@@ -18,7 +18,16 @@ run input = do
   print (length safeReports)
 
 isSafeReport :: [Int] -> Bool
-isSafeReport levels = isAllDecreasing levels || isAllIncreasing levels
+isSafeReport levels =
+    let allMutations = computeMutations levels
+    in any (\l -> isAllDecreasing l || isAllIncreasing l) allMutations
+
+computeMutations levels =
+    let removalLevels = map (deleteNth levels) [0.. length levels]
+    in levels:removalLevels
+
+
+deleteNth xs i = take i xs ++ drop (succ i) xs
 
 isAllDecreasing (x : xs) =
   let result = foldl (\(lastNumber, lastResult) currentNumber -> (currentNumber, lastResult && lastNumber - currentNumber >= 1 && lastNumber - currentNumber <= 3)) (x, True) xs
