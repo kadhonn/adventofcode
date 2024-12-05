@@ -1,4 +1,4 @@
-import Day5_1
+import Day5_2
 
 main :: IO ()
 main = do
