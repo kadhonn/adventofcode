@@ -19,4 +19,4 @@ canBeSolved (s, nr : nrs) = canBeSolvedR s nr nrs
 
 canBeSolvedR :: Int -> Int -> [Int] -> Bool
 canBeSolvedR s r [] = s == r
-canBeSolvedR s r (nr : nrs) = canBeSolvedR s (r * nr) nrs || canBeSolvedR s (r + nr) nrs
+canBeSolvedR s r (nr : nrs) = canBeSolvedR s (r * nr) nrs || canBeSolvedR s (r + nr) nrs || canBeSolvedR s (read (show r ++ show nr)) nrs
