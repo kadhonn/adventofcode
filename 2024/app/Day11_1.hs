@@ -19,19 +19,19 @@ import Debug.Trace
 run :: String -> IO ()
 run input = do
   let stones = map (read :: String -> Int) . words $ input
-      result = blinkTimes M.empty 25 stones
+      result = blinkTimes M.empty 75 stones
   print stones
   print result
 
-blinkTimes :: M.Map Int Int -> Int -> [Int] -> Int
+blinkTimes :: M.Map (Int,Int) Int -> Int -> [Int] -> Int
 blinkTimes cache times stones = sum . map (snd . blinkTimesStone cache times) $ stones
 
-blinkTimesStone :: M.Map Int Int -> Int -> Int -> (M.Map Int Int, Int)
+blinkTimesStone :: M.Map (Int,Int) Int -> Int -> Int -> (M.Map (Int,Int) Int, Int)
 blinkTimesStone cache 0 _ = (cache, 1)
 blinkTimesStone cache times stone =
---  case M.lookup stone cache of
---    Just r -> (cache, r)
---    Nothing ->
+  case M.lookup (stone, times) cache of
+    Just r -> (cache, r)
+    Nothing ->
       let (cacher, nrr) =
             if stone == 0
               then
@@ -47,4 +47,4 @@ blinkTimesStone cache times stone =
                          in (cacheright, resultleft + resultright)
                       else
                         blinkTimesStone cache (times - 1) (stone * 2024)
-       in (M.insert stone nrr cacher, nrr)
+       in (M.insert (stone, times) nrr cacher, nrr)
