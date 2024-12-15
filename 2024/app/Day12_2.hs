@@ -4,7 +4,7 @@
 
 {-# HLINT ignore "Eta reduce" #-}
 
-module Day12_1
+module Day12_2
   ( run,
   )
 where
@@ -15,6 +15,7 @@ import Data.Map qualified as M
 import Data.Set qualified as Set
 import Data.Vector qualified as V
 import Debug.Trace
+import GHC.Real (FractionalExponentBase (Base2))
 import Utils
 
 run :: String -> IO ()
@@ -35,8 +36,31 @@ calcResult = sum . map calcSingleResult
 calcSingleResult :: Set.Set Point -> Int
 calcSingleResult region =
   let area = length region
-      perimeter = sum . map (length . filter (`notElem` region) . neighbours) . Set.toList $ region
-   in area * perimeter
+      borderFieldPairs = mconcat . map (\p -> map (p,) . filter (`notElem` region) . neighbours $ p) . Set.toList $ region
+      borders = map toBorder borderFieldPairs
+      borderMapInsert = M.insertWith (++)
+      borderMap = foldl' (\m (f, t) -> borderMapInsert f [t] (borderMapInsert t [f] m)) M.empty borders
+      sides = countSides borderMap
+   in area * trace (show borderMap) (trace (show sides) sides)
+
+countSides :: M.Map Point [Point] -> Int
+countSides = sum . map cornerCount . M.assocs
+
+cornerCount :: (Point, [Point]) -> Int
+cornerCount (f, [t1, t2]) = if isHorizontal f t1 == isHorizontal f t2 then 0 else 1
+cornerCount (_, l)
+  | length l == 4 = 2
+  | otherwise = error "wat"
+
+isHorizontal (x1, _) (x2, _) = x1 /= x2
+
+toBorder :: (Point, Point) -> (Point, Point)
+toBorder ((x1, y1), (x2, y2)) =
+  if x1 == x2
+    then
+      ((x1, max y1 y2), (x1 + 1, max y1 y2))
+    else
+      ((max x1 x2, y1), (max x1 x2, y1 + 1))
 
 solveState :: Field Char -> State -> State
 solveState field s@(State x y alreadyOccupiedMap regions)
